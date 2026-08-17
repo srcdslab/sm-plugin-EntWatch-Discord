@@ -6,15 +6,15 @@ This repository contains **EntWatch_Discord**, a SourceMod plugin that integrate
 
 ### Key Components
 - **Main Plugin**: `addons/sourcemod/scripting/EntWatch_Discord.sp` - Core plugin source code
-- **Build System**: `sourceknight.yaml` - SourceKnight build configuration
+- **Build System**: `.github/workflows/ci.yml` - Native GitHub Actions build configuration
 - **CI/CD**: `.github/workflows/ci.yml` - Automated build and release pipeline
 
 ## Technical Environment
 
 - **Language**: SourcePawn (SourceMod scripting language)
-- **Platform**: SourceMod 1.11.0+ (specifically 1.11.0-git6917)
-- **Build Tool**: SourceKnight (modern SourceMod build system)
-- **Compiler**: SourcePawn compiler (spcomp) via SourceKnight
+- **Platform**: SourceMod 1.12+
+- **Build Tool**: Native GitHub Actions workflow (`rumblefrog/setup-sp` + `spcomp`)
+- **Compiler**: SourcePawn compiler (spcomp) via GitHub Actions
 - **Target Games**: Source Engine games (CS:GO, CS2, TF2, etc.)
 
 ## Dependencies and Architecture
@@ -58,25 +58,26 @@ Messages are formatted via RelayHelper and include:
 - Link to ban website (if configured via `eban_website` ConVar)
 - Total ban count for the target player
 
-## Build System (SourceKnight)
+## Build System (Native GitHub Actions)
 
 ### Configuration
-The `sourceknight.yaml` file defines:
+The `.github/workflows/ci.yml` file defines:
 - **Project name**: EntWatch_Discord
-- **Dependencies**: Automatic download and setup of required plugins
-- **Build target**: Single plugin compilation
+- **Dependencies**: `EntWatch`, `RelayHelper`, and `DiscordWebhookAPI` are cloned via `git clone --depth=1` and their `.inc` files copied into `addons/sourcemod/scripting/include/`
+- **Build target**: Single plugin compilation (`EntWatch_Discord.sp`)
 - **Output**: Compiled `.smx` plugin file
 
 ### Building Locally
 ```bash
-# Install SourceKnight if not available
-# Run build (typically via GitHub Actions)
-# Output will be in .sourceknight/package/addons/sourcemod/plugins/
+# Install the SourcePawn compiler (spcomp) matching SourceMod 1.12
+# Clone the git dependencies listed in ci.yml into addons/sourcemod/scripting/include/
+# From addons/sourcemod/scripting:
+spcomp -i include -o ../plugins/EntWatch_Discord.smx EntWatch_Discord.sp
 ```
 
 ### CI/CD Pipeline
 The GitHub Actions workflow (`ci.yml`):
-1. **Build**: Compiles plugin using SourceKnight action
+1. **Build**: Installs spcomp via `rumblefrog/setup-sp`, clones dependencies, and compiles the plugin directly with `spcomp`
 2. **Package**: Creates distributable package
 3. **Tag**: Creates/updates 'latest' tag on main branch pushes
 4. **Release**: Creates GitHub releases with compiled plugin
@@ -196,7 +197,7 @@ GetClientSteamAvatar(client); // Populates g_sClientAvatar[client]
 ## Common Issues and Solutions
 
 ### Build Issues
-- **Missing dependencies**: SourceKnight automatically downloads them via `sourceknight.yaml`, but verify all repositories are accessible
+- **Missing dependencies**: The CI workflow clones them automatically via `git clone` in `.github/workflows/ci.yml`, but verify all repositories are accessible
 - **Compilation errors**: Usually indicate API changes in dependencies (EntWatch, RelayHelper, DiscordWebhookAPI)
 - **Include path issues**: Dependencies should auto-install to `addons/sourcemod/scripting/include/`
 - **Version conflicts**: Ensure SourceMod version matches dependency requirements
@@ -247,7 +248,7 @@ GetClientSteamAvatar(client); // Populates g_sClientAvatar[client]
 ## Getting Started for New Contributors
 
 1. **Fork and clone** the repository
-2. **Review dependencies** in `sourceknight.yaml`
+2. **Review dependencies** in `.github/workflows/ci.yml`
 3. **Understand the plugin flow** from EntWatch to Discord
 4. **Check existing issues** for enhancement opportunities
 5. **Test changes** with a real Discord webhook
@@ -258,7 +259,6 @@ GetClientSteamAvatar(client); // Populates g_sClientAvatar[client]
 - [SourceMod API Documentation](https://sm.alliedmods.net/new-api/)
 - [EntWatch Plugin Repository](https://github.com/srcdslab/sm-plugin-EntWatch)
 - [RelayHelper Plugin Repository](https://github.com/srcdslab/sm-plugin-RelayHelper)
-- [SourceKnight Build Tool](https://github.com/maxime1907/sourceknight)
 - [Discord Webhook Documentation](https://discord.com/developers/docs/resources/webhook)
 
 ## File Structure Reference
@@ -270,5 +270,4 @@ GetClientSteamAvatar(client); // Populates g_sClientAvatar[client]
 │   └── copilot-instructions.md   # This file
 ├── addons/sourcemod/scripting/
 │   └── EntWatch_Discord.sp       # Main plugin source
-└── sourceknight.yaml             # Build configuration
 ```
