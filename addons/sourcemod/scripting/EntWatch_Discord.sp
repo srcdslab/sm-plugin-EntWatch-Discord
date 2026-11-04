@@ -15,7 +15,7 @@ public Plugin myinfo =
 {
 	name 		= PLUGIN_NAME,
 	author 		= ".Rushaway, Dolly, koen",
-	version 	= "1.0",
+	version 	= "1.0.1",
 	description = "Send EntWatch Ban/Unban notifications to discord",
 	url 		= "https://nide.gg"
 };
